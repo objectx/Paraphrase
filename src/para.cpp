@@ -49,8 +49,6 @@
 
 const char *kVersion=VERSION;
 
-TypedValue G_InvalidTV=TypedValue();
-
 const int kMaxHistory=255;
 
 static const char *gInputFile=NULL;

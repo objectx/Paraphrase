@@ -2,7 +2,7 @@
 
 #include <vector>
 
-extern TypedValue G_InvalidTV;
+extern TypedValue G_InvalidTV ;
 
 typedef std::vector<TypedValue> Stack;
 

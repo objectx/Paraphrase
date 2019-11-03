@@ -12,6 +12,8 @@
 #include "context.h"
 #include "thread.h"
 
+TypedValue G_InvalidTV {} ;
+
 static TypedValue fullClone(TypedValue& inTV);
 static void showStack(Stack& inStack,const char *inStackName);
 static void printLine(int inWidth);
@@ -80,7 +82,7 @@ void InitDict_Stack() {
 					std::deque<TypedValue> *destPtr=new std::deque<TypedValue>(*srcPtr);
 					inContext.DS.emplace_back(destPtr);
 				}
-				break;			
+				break;
 			default:
 				inContext.DS.emplace_back(tos);
 		}
@@ -113,7 +115,7 @@ void InitDict_Stack() {
 		TypedValue& second=inContext.DS[inContext.DS.size()-2];
 		inContext.DS.emplace_back(second);
 		NEXT;
-	}));	
+	}));
 
 	Install(new Word("pick",WORD_FUNC {
 		if(inContext.DS.size()<1) { return inContext.Error(E_DS_IS_EMPTY); }
@@ -140,7 +142,7 @@ void InitDict_Stack() {
 		inContext.DS.emplace_back(second);
 		inContext.DS.emplace_back(tos);
 		NEXT;
-	}));	
+	}));
 
 	Install(new Word("drop",WORD_FUNC {
 		if(inContext.DS.size()<1) { return inContext.Error(E_DS_IS_EMPTY); }
@@ -162,7 +164,7 @@ void InitDict_Stack() {
 		inContext.DS.emplace_back(third);
 		NEXT;
 	}));
-	
+
 	// (a b c -- c a b) note:inverse of rot.
 	Install(new Word("inv-rot",WORD_FUNC {
 		if(inContext.DS.size()<3) { return inContext.Error(E_DS_AT_LEAST_3); }
