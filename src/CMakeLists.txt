@@ -21,17 +21,18 @@ set (tgt_ ${PROJECT_NAME}-no-rtti)
 set (tgt_ ${PROJECT_NAME}-common)
     add_library (${tgt_} INTERFACE)
     target_compile_features (${tgt_} INTERFACE cxx_std_17)
-    target_compile_definitions (${tgt_} INTERFACE
-                                USE_NOEXCEPT=1 USE_PTHREAD=1
-                                $<IF:$<CONFIG:Release>,NDEBUG=1,DEBUG=1>)
+    target_compile_definitions (${tgt_}
+                                INTERFACE USE_NOEXCEPT=1
+                                          USE_PTHREAD=1
+                                          $<IF:$<CONFIG:Release>,NDEBUG=1,DEBUG=1>)
     target_include_directories (${tgt_} INTERFACE inc)
 
 add_subdirectory (dict)
 add_subdirectory (lang)
 
 set (tgt_ para)
-    add_executable (${tgt_} lang/para.cpp)
-    target_link_libraries (para
+    add_executable (${tgt_} para.cpp)
+    target_link_libraries (${tgt_}
                            PRIVATE PP
                                    ${PROJECT_NAME}-common
                                    ${PROJECT_NAME}-no-rtti
