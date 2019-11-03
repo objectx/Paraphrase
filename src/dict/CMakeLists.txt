@@ -1,7 +1,7 @@
 
 cmake_minimum_required (VERSION 3.15)
 
-set (libname_ libdict)
+set (libname_ dict)
 
 set (srcs_
      dictWord.cpp
@@ -14,12 +14,11 @@ set (srcs_
      dictArray.cpp
      dictList.cpp
      dictParallel.cpp
-     dictOptimize.cpp
-     ext/extFactor.cpp
-     ext/extLP.cpp)
-
+     dictOptimize.cpp)
 
 add_library (${libname_} OBJECT ${srcs_})
 target_link_libraries (${libname_} PRIVATE
                        Boost::headers
                        ${PROJECT_NAME}-common ${PROJECT_NAME}-no-rtti)
+
+add_subdirectory (ext)

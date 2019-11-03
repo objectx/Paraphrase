@@ -8,6 +8,8 @@
 #include "word.h"
 #include "context.h"
 
+unsigned int G_NumOfCores = 1;
+
 static bool closeParallelBlock(Context& inContext,int inNumOfParallels);
 static void execParallel(Context& inContext,TypedValue& inTVExec,
 						 int inNumOfParallels=-1);
@@ -36,7 +38,7 @@ void InitDict_Parallel() {
 		if(closeParallelBlock(inContext,numOfCores)==false) { return false; }
 		NEXT;
 	}));
-	
+
 	Install(new Word("_exec/single",WORD_FUNC {
 		if(inContext.DS.size()<1) { return inContext.Error(E_DS_IS_EMPTY); }
 		TypedValue tos=Pop(inContext.DS);
@@ -45,7 +47,7 @@ void InitDict_Parallel() {
 		}
 		execParallel(inContext,tos,1);
 		NEXT;
-	}));	
+	}));
 
 	Install(new Word("_exec/parallel",WORD_FUNC {
 		if(inContext.DS.size()<1) { return inContext.Error(E_DS_IS_EMPTY); }
@@ -55,7 +57,7 @@ void InitDict_Parallel() {
 		}
 		execParallel(inContext,tos);
 		NEXT;
-	}));	
+	}));
 
 	Install(new Word(">child",WORD_FUNC {
 		if(inContext.DS.size()<1) { return inContext.Error(E_DS_IS_EMPTY); }
@@ -135,7 +137,7 @@ void InitDict_Parallel() {
 		inContext.DS.emplace_back(inContext.fromPipe->Recv());
 		NEXT;
 	}));
-	
+
 	Install(new Word("eoc",WORD_FUNC {
 		inContext.DS.emplace_back(kTypeEOC);
 		NEXT;
@@ -143,7 +145,7 @@ void InitDict_Parallel() {
 
 	// dup & eoc?
 	Install(new Word("eoc?",WORD_FUNC {
-		if(inContext.DS.size()<1) { return inContext.Error(E_DS_IS_EMPTY); }	
+		if(inContext.DS.size()<1) { return inContext.Error(E_DS_IS_EMPTY); }
 		TypedValue& tos=ReadTOS(inContext.DS);
 		inContext.DS.emplace_back(tos.dataType==kTypeEOC);
 		NEXT;
@@ -185,10 +187,10 @@ void InitDict_Parallel() {
 			if(&inContext==GlobalContext) {
 				inContext.toPipe->CloseOnWrite();
 				inContext.fromPipe=inContext.lastOutputPipe;
-			} else { return inContext.Error(E_NO_CHAN_FROM_PIPE); }	
+			} else { return inContext.Error(E_NO_CHAN_FROM_PIPE); }
 		}
 		TypedValue tv=inContext.fromPipe->Recv();
-		
+
 		// eoc? and _branch-if-true
 		if(tv.dataType==kTypeEOC) {
 			inContext.ip=(const Word**)(*(inContext.ip+1));
@@ -298,7 +300,7 @@ void InitDict_Parallel() {
 
 	Install(new Word("num-of-threads",WORD_FUNC {
 		inContext.DS.emplace_back((int)G_NumOfCores);
-		NEXT;	
+		NEXT;
 	}));
 }
 
@@ -331,7 +333,7 @@ static void execParallel(Context& inContext,TypedValue& inTVExec,
 	if( inContext.fromChild ) {
 		inContext.fromChild->RemoveReader();
 		inContext.fromChild.reset();
-	}	
+	}
 	inContext.fromChild.reset(new ChanMan(numOfParallels,"child>"));
 	inContext.fromChild->SetNumOfReader(1);	// only parent
 
@@ -348,7 +350,7 @@ static void execParallel(Context& inContext,TypedValue& inTVExec,
 		for(int i=0; i<numOfParallels; i++) {
 			Context *childContext=new Context(&inContext,kInterpretLevel,
 											  inContext.toChild,
-											  inContext.fromChild);	
+											  inContext.fromChild);
 			childContext->fromPipe=inContext.lastOutputPipe;
 			childContext->toPipe=toPipe;
 			if(inContext.initParamForPBlock.dataType!=kTypeInvalid) {
@@ -368,14 +370,14 @@ static void execParallel(Context& inContext,TypedValue& inTVExec,
 
 	inContext.initParamForPBlock=TypedValue();
 	inContext.isInitParamBroadcast=true;
-	
+
 	if(&inContext==GlobalContext) {
 		inContext.fromPipe=inContext.lastOutputPipe;
 	}
 }
 static void *kicker(void *inContext) {
 	Context *childContext=(Context *)inContext;
-	
+
 	if(childContext->DS.size()<1) {
 		childContext->Error(E_DS_IS_EMPTY);
 		return NULL;

@@ -50,7 +50,6 @@
 const char *kVersion=VERSION;
 
 TypedValue G_InvalidTV=TypedValue();
-unsigned int G_NumOfCores=std::thread::hardware_concurrency();
 
 const int kMaxHistory=255;
 
@@ -90,6 +89,7 @@ void InitDict_Parallel();
 void InitDict_Optimize();
 
 int main(int argc,char *argv[]) {
+    G_NumOfCores=std::thread::hardware_concurrency();
 #if DEBUG || _DEBUG
 	printf("!!! THIS IS DEBUG VERSION !!!\n");
 	#ifdef _MSVC_LANG
@@ -100,7 +100,7 @@ int main(int argc,char *argv[]) {
 	#endif
 #endif
 
-	boost::timer::cpu_timer timer; 
+	boost::timer::cpu_timer timer;
 
 	if(parseOption(argc,argv)==false) { return -1; }
 	if(initReadLineFunc()==false) { return -1; }
@@ -111,16 +111,16 @@ int main(int argc,char *argv[]) {
 	InitOuterInterpreter();
 
 	if(gArgsForScriptFile.size()>0) {
-		const size_t n=gArgsForScriptFile.size();	
+		const size_t n=gArgsForScriptFile.size();
 		for(size_t i=0; i<n; i++) {
-			std::string s=gArgsForScriptFile[i];	
+			std::string s=gArgsForScriptFile[i];
 			if(s[0]!='"' && s[0]!='\'') {
 				s="'"+s+"'";
 			}
-			bool result=OuterInterpreter(*GlobalContext,s);	
+			bool result=OuterInterpreter(*GlobalContext,s);
 			if(result==false) {
 				return -1;
-			}	
+			}
 		}
 	}
 
@@ -198,14 +198,14 @@ static bool parseOption(int argc,char *argv[]) {
 		for(auto const& str
 		  : bstPrgOpt::collect_unrecognized(parseResult.options,
 											bstPrgOpt::include_positional)) {
-			argVec.push_back(str);	
+			argVec.push_back(str);
 		}
 	} catch(const bstPrgOpt::error& e) {
 		std::cerr << e.what() << '\n';
 		std::cerr << desc << '\n';
         return false;
 	}
-	
+
 	if( vm.count("help")     ) { printUsage();	return false; }
 	if( vm.count("version")  ) { printVersion(); return false; }
 	if( vm.count("time")     ) { gDisplayTime=true; }
@@ -227,7 +227,7 @@ static bool parseOption(int argc,char *argv[]) {
 	if(n>0) {
 		gInputFile=strdup(argVec[0].c_str());
 		for(size_t i=1; i<n; i++) {
-			std::string s=argVec[i];	
+			std::string s=argVec[i];
 			if(s.length()>1 && s[0]=='"' && s[s.length()-1]!='"') {
 				for(++i; i<n; i++) {
 					std::string t=argVec[i];
@@ -235,17 +235,17 @@ static bool parseOption(int argc,char *argv[]) {
 						fprintf(stderr,
 								"ERROR: illegal quotation at script arg[%zu]\n",i);
 						return false;
-					}	
+					}
 					s+=" "+t;
 					if(t.length()>1 && t[0]!='"' && t[t.length()-1]=='"') {
 						break;
 					}
 				}
-			}	
-			gArgsForScriptFile.push_back(s);	
+			}
+			gArgsForScriptFile.push_back(s);
 		}
 	} else {
-		gInputFile=NULL;	
+		gInputFile=NULL;
 	}
 	return true;
 }
@@ -264,7 +264,7 @@ static bool initReadLineFunc() {
 			std::string skipLine;
 			gIsEOF=std::getline(gFileStream,skipLine).eof();
 		}
-		gReadLineFunc=readFromFile;	
+		gReadLineFunc=readFromFile;
 	}
 	return true;
 }
